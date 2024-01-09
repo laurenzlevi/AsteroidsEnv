@@ -109,8 +109,6 @@ class AsteroidsEnv(gym.Env):
             for i in range(self.num_rays):
                 low.extend([
                         -MAX_RAY_LENGTH,  # distance to ray hit
-                        -MAX_RAY_LENGTH,  # x position of hit point
-                        -MAX_RAY_LENGTH,  # y position of hit point
                         -1.0,  # x direction of asteroid
                         -1.0  # y direction of asteroid
                     ]
@@ -129,8 +127,6 @@ class AsteroidsEnv(gym.Env):
             for i in range(self.num_rays):
                 high.extend([
                         MAX_RAY_LENGTH,  # distance to ray hir
-                        self.width + MAX_RAY_LENGTH,  # x position of hit point
-                        self.height + MAX_RAY_LENGTH,  # y position of hit point
                         1.0,  # x direction of asteroid
                         1.0  # y direction of asteroid
                     ]

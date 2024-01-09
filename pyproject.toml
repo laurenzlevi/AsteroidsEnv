@@ -1,9 +1,14 @@
 [build-system]
-requires = ["scikit-build-core >=0.4.3", "gymnasium>=0.26.0", "pygame>=2.1.0", "numpy>=1.19"]
-build-backend = "scikit_build_core.build"
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "asteroidsenv"
+dependencies=[
+    "gymnasium>=0.26.0",
+    "pygame>=2.1.0",
+    "numpy>=1.19"
+]
 version = "1.0.0"
 description = "The atari classic asteroids as gymnasium environment"
 readme = "README.md"
@@ -11,15 +16,10 @@ requires-python = ">=3.8"
 authors = [
     { name = "Laurenz Levi Spielmann", email = "laurenz-levi.spielmann@tu-dortmund.de"}
 ]
-license="MIT"
+license = {file = "LICENSE"}
 
-[tool.setuptools.packages.find]
-where = "asteroidsenv"
+[tool.setuptools]
+packages = ["asteroidsenv", "asteroidsenv.env"]
 
 [tool.setuptools.package-data]
 Resources = ["*.png"]
-
-[tool.scikit-build]
-minimum-version = "0.4"
-build-dir = "build/{wheel_tag}"
-wheel.py-api = "cp312"

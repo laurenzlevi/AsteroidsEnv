@@ -22,8 +22,7 @@ The agent get the following values as features:
 4. "velocity": Scalar velocity of the agent
 5. "angular_velocity": Scalar angular velocity of the agent
 6. "hit_distance": Distance to the asteroid hit
-7. "ray_hit<num>": Point of intersection between Ray and Asteroid (Vec2(math.inf, math.inf) if no Asteroid was hit)
-8. "ray_direction<num>": Normalized direction vector of the Asteroid the ray intersected (not implemented yet)
+7. "ray_direction<num>": Normalized direction vector of the Asteroid the ray intersected (not implemented yet)
 The Shape of the vector depends on the number of rays the agent uses to see, but can be calculated via (8 + 5 * <num_rays>)
 ## Pixel Space
 A 64 by 64 pixel image, the Observation Space has the Shape (64, 64, 3).
