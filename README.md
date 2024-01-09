@@ -53,21 +53,3 @@ Visualizes the environment in a way the agent would "see" by rendering...
 7. ...the velocity, angular velocity and position of the player (as text)
 ![agent](https://github.com/TU-Dortmund-ADRL-WiSe-2023-24/laurenzlevi/assets/72398071/3cd3d5ca-4e6f-4ed9-9098-099262c280b9)
 ### 4. "rgb_array"
-## Missing Features
-1. Multiple lifes for the agent
-## Utilities
-### stable-baselines3
-A `stable-baselines3` script that can be used to load and train models. "Resources/Models/Model.bin" 
-contains a pretrained model, by default the scripts loads this model and simulates it for 10.000 time steps.
-### run.py
-Implementation of `gymnasium.utils.play.play` with the following key mapping:
-1. W: Forward
-2. S: Backward
-3. A: Turn Left
-4. D: Turn Right
-5. Space: Shoot
-### capture.py
-A utility script to create a gif from a randomized playthrough of the environment.
-The script safes every x frames, depending on the target framerate, to a folder in "Resources/Capture/%Y-%m-%y_%H-%M-%S/, then creates a gif with the target framerate in the same folder.
-### test.py
-Creates the environment and simulates a randomized playthrough.
