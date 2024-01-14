@@ -47,7 +47,7 @@ class AsteroidsEnv(gym.Env):
         self.width, self.height = 960.0, 960.0
 
         if num_rays is None:
-            self.num_rays = 8
+            self.num_rays = 16
         elif type(num_rays) is int:
             assert num_rays > 0
             self.num_rays = num_rays
@@ -56,17 +56,21 @@ class AsteroidsEnv(gym.Env):
             self.num_rays = 8
 
         # surface used for rendering
-        pygame.init()
-        self.surface = pygame.Surface([self.width, self.height])
+        pygame.display.init()
 
-        # setup display for human rendering
-        pygame.display.set_caption("Asteroids")
+        if self.render_mode == "human" or self.render_mode == "agent":
+            self.surface = pygame.display.set_mode(size=[self.width, self.height])
+            self.resource_manager = ResourceManager(resource_dir + '/Resources/Textures/', True)
 
-        self.screen = pygame.display.set_mode(size=[self.width, self.height])
-        self.font = pygame.font.SysFont('arial', 24)
-        self.clock = pygame.time.Clock()
+            # setup display for human rendering
+            pygame.display.set_caption("Asteroids")
 
-        self.resource_manager = ResourceManager(resource_dir + 'Resources/Images/')
+            pygame.font.init()
+            self.font = pygame.font.SysFont('arial', 24)
+            self.clock = pygame.time.Clock()
+        else:
+            self.surface = pygame.Surface(size=[self.width, self.height])
+            self.resource_manager = ResourceManager(resource_dir + '/Resources/Images/', False)
 
         # initializes all game components
         self.spaceship = Spaceship(self.resource_manager.load_sprite("Agent.png", True), self.num_rays, Vec2(self.width, self.height))
@@ -75,7 +79,7 @@ class AsteroidsEnv(gym.Env):
         self.spacerock_image_16 = self.resource_manager.load_sprite("Spacerock32.png", True)
         self.spacerock_image_8 = self.resource_manager.load_sprite("Spacerock16.png", True)
         self.spacerock_radius = 32.0
-        self.min_spacerock_radius = 8.0
+        self.min_spacerock_radius = 16.0
         self.spawn_counter = 0
         self.spawn_delay = 60
         self.ray_hits = []
@@ -212,7 +216,6 @@ class AsteroidsEnv(gym.Env):
                         self.spacerocks.append(Spacerock(spacerock.position.copy(), spacerock.radius/2.0, spacerock.direction.rotate(45.0), spacerock.velocity, spacerock.bounds))
                         self.spacerocks.append(Spacerock(spacerock.position.copy(), spacerock.radius/2.0, spacerock.direction.rotate(-45.0), spacerock.velocity, spacerock.bounds))
 
-                    # TODO tune rewards
                     self.reward += 1.0
 
             # check if any of the hitbox lines are colliding with the asteroid
@@ -352,10 +355,8 @@ class AsteroidsEnv(gym.Env):
         elif self.render_mode == "agent":
             self._render_agent()
 
-        # blit the frame onto the screen and lock the framerate
+        # update screen and lock the framerate
         if self.render_mode == "human" or self.render_mode == "agent":
-            self.screen.blit(self.surface, [0, 0])
-
             pygame.display.flip()
             pygame.event.pump()
             self.clock.tick(self.metadata["render_fps"])
@@ -368,8 +369,6 @@ class AsteroidsEnv(gym.Env):
                 rock.render(self.surface, self.spacerock_image_32)
             elif rock.radius == 16.0:
                 rock.render(self.surface, self.spacerock_image_16)
-            elif rock.radius == 8.0:
-                rock.render(self.surface, self.spacerock_image_8)
             else:
                 # backup if no texture in the right size is available
                 pygame.draw.circle(self.surface, [255, 255, 255, 255], rock.center(), rock.radius, 4)
