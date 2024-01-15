@@ -44,7 +44,7 @@ class AsteroidsEnv(gym.Env):
             self.render_mode = "human"
             self.render_debug = False
 
-        self.width, self.height = 960.0, 960.0
+        self.width, self.height = 840.0, 840.0
 
         if num_rays is None:
             self.num_rays = 16
@@ -98,7 +98,7 @@ class AsteroidsEnv(gym.Env):
             self.obs_type = obs_type
 
         if self.obs_type == "pixels":
-            self.observation_space = gym.spaces.Box(0, 255, shape=(64, 64, 3), dtype=np.uint8)
+            self.observation_space = gym.spaces.Box(0.0, 1.0, shape=(84, 84, 3), dtype=np.float32)
         elif self.obs_type == "features":
             low = [
                 0.0,  # x agent position
@@ -107,30 +107,34 @@ class AsteroidsEnv(gym.Env):
                 -1.0,  # y forward normal
                 -1.0,  # x direction
                 -1.0,  # y direction
-                -self.spaceship.max_velocity,  # forward velocity
-                -self.spaceship.max_angular_velocity,  # angular velocity
+                -1.0,  # forward velocity
+                -1.0,  # angular velocity
             ]
             for i in range(self.num_rays):
                 low.extend([
-                        -MAX_RAY_LENGTH,  # distance to ray hit
+                        0.0,  # distance to ray hit
+                        -1.0,  # x position of the ray hit
+                        -1.0,  # y position of the ray hit
                         -1.0,  # x direction of asteroid
                         -1.0  # y direction of asteroid
                     ]
                 )
 
             high = [
-                self.width,  # x agent position
-                self.height,  # y agent position
+                1.0,  # x agent position
+                1.0,  # y agent position
                 1.0,  # x forward normal
                 1.0,  # y forward normal
                 1.0,  # x direction
                 1.0,  # y direction
-                self.spaceship.max_velocity,  # forward velocity
-                self.spaceship.max_angular_velocity,  # angular velocity
+                1.0,  # forward velocity
+                1.0,  # angular velocity
             ]
             for i in range(self.num_rays):
                 high.extend([
-                        MAX_RAY_LENGTH,  # distance to ray hir
+                        1.0,  # distance to ray hit
+                        2.0,  # x position of the ray hit
+                        2.0,  # y position of the ray hit
                         1.0,  # x direction of asteroid
                         1.0  # y direction of asteroid
                     ]
@@ -196,6 +200,9 @@ class AsteroidsEnv(gym.Env):
 
         # delete all rocks that are out of bounds
         self._delete_out_of_screen()
+
+        if self.render_mode == 'human' or self.render_mode == 'agent' or self.obs_type == 'pixels':
+            self.render()
 
         # return tuple of observation, reward, terminated, truncated, info
         return self._get_obs(), self.reward, not self.spaceship.alive, False, self._get_info()
@@ -286,31 +293,28 @@ class AsteroidsEnv(gym.Env):
 
     def _get_obs(self):
         if self.obs_type == "pixels":
-            transformed = pygame.transform.smoothscale(self.surface, [64, 64])
-
-            return np.transpose(
-                np.array(pygame.surfarray.pixels3d(transformed)), axes=(1, 0, 2)
-            )
+            transformed = pygame.transform.smoothscale(self.surface, [84, 84])
+            return (pygame.surfarray.pixels3d(transformed)/255.0).astype(dtype=np.float32)
 
         elif self.obs_type == "features":
             features = [
-                self.spaceship.hitbox.center.x,
-                self.spaceship.hitbox.center.y,
+                self.spaceship.hitbox.center.x/self.width,
+                self.spaceship.hitbox.center.y/self.height,
                 self.spaceship.forward_normal.x,
                 self.spaceship.forward_normal.y,
                 self.spaceship.direction.x,
                 self.spaceship.direction.y,
-                self.spaceship.velocity,
-                self.spaceship.angular_velocity
+                self.spaceship.velocity/self.spaceship.max_velocity,
+                self.spaceship.angular_velocity/self.spaceship.max_angular_velocity
             ]
 
             assert len(self.ray_hits) == self.num_rays
             for hit in self.ray_hits:
                 if hit.object is not None:
                     features.extend([
-                            hit.distance,  # distance to ray hit
-                            hit.point.x,  # x position of hit point
-                            hit.point.y,  # y position of hit point
+                            hit.distance/MAX_RAY_LENGTH,  # distance to ray hit
+                            hit.point.x/self.width,  # x position of hit point
+                            hit.point.y/self.height,  # y position of hit point
                             hit.object.direction.x,  # x direction of asteroid
                             hit.object.direction.y  # y direction of asteroid
                         ]
@@ -318,9 +322,9 @@ class AsteroidsEnv(gym.Env):
                 else:
                     # if no asteroid was hit the endpoint of the ray is passed
                     features.extend([
-                            MAX_RAY_LENGTH,  # distance to ray hit
-                            hit.point.x,  # x position of hit point
-                            hit.point.y,  # y position of hit point
+                            1.0,  # distance to ray hit
+                            hit.point.x/self.width,  # x position of hit point
+                            hit.point.y/self.height,  # y position of hit point
                             0.0,  # x direction of asteroid
                             0.0  # y direction of asteroid
                         ]
@@ -335,9 +339,7 @@ class AsteroidsEnv(gym.Env):
         self._render_frame()
 
         if self.render_mode == "rgb_array":
-            return np.transpose(
-                np.array(pygame.surfarray.pixels3d(self.surface)), axes=(1, 0, 2)
-            )
+            return np.array(pygame.surfarray.pixels3d(self.surface))
 
     """
     Renders the frame to self.surface
@@ -348,7 +350,9 @@ class AsteroidsEnv(gym.Env):
 
         if self.render_mode == "human" or self.render_mode == "rgb_array":
             self._render_human()
-            self._render_action()
+
+            if self.render_mode == "human":
+                self._render_action()
 
             if self.render_debug:
                 self._render_debug()
