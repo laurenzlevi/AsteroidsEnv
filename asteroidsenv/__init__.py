@@ -4,7 +4,7 @@ import os
 resource_dir = os.path.dirname(os.path.realpath(__file__)) + '/'
 
 register(
-     id="asteroidsenv/Asteroids-features-v0",
+     id="Asteroids-features-v0",
      entry_point="asteroidsenv.env:AsteroidsEnv",
      kwargs={
           "obs_type": "features"
@@ -12,7 +12,7 @@ register(
 )
 
 register(
-     id="asteroidsenv/Asteroids-pixels-v0",
+     id="Asteroids-pixels-v0",
      entry_point="asteroidsenv.env:AsteroidsEnv",
      kwargs={
           "obs_type": "pixels"
