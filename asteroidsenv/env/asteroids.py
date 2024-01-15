@@ -94,7 +94,7 @@ class AsteroidsEnv(gym.Env):
             self.obs_type = obs_type
 
         if self.obs_type == "pixels":
-            self.observation_space = gym.spaces.Box(0, 255, shape=(84, 84, 3), dtype=np.uint8)
+            self.observation_space = gym.spaces.Box(0.0, 1.0, shape=(84, 84, 3), dtype=np.float32)
         elif self.obs_type == "features":
             low = [
                 0.0,  # x agent position
@@ -197,6 +197,9 @@ class AsteroidsEnv(gym.Env):
         # delete all rocks that are out of bounds
         self._delete_out_of_screen()
 
+        if self.render_mode == 'human' or self.render_mode == 'agent' or self.obs_type == 'pixels':
+            self.render()
+
         # return tuple of observation, reward, terminated, truncated, info
         return self._get_obs(), self.reward, not self.spaceship.alive, False, self._get_info()
 
@@ -287,11 +290,8 @@ class AsteroidsEnv(gym.Env):
 
     def _get_obs(self):
         if self.obs_type == "pixels":
-            transformed = pygame.transform.smoothscale(self.surface, [64, 64])
-
-            return np.transpose(
-                np.array(pygame.surfarray.pixels3d(transformed)), axes=(1, 0, 2)
-            )
+            transformed = pygame.transform.smoothscale(self.surface, [84, 84])
+            return (pygame.surfarray.pixels3d(transformed)/255.0).astype(dtype=np.float32)
 
         elif self.obs_type == "features":
             features = [
@@ -336,9 +336,7 @@ class AsteroidsEnv(gym.Env):
         self._render_frame()
 
         if self.render_mode == "rgb_array":
-            return np.transpose(
-                np.array(pygame.surfarray.pixels3d(self.surface)), axes=(1, 0, 2)
-            )
+            return np.array(pygame.surfarray.pixels3d(self.surface))
 
     """
     Renders the frame to self.surface
@@ -349,7 +347,9 @@ class AsteroidsEnv(gym.Env):
 
         if self.render_mode == "human" or self.render_mode == "rgb_array":
             self._render_human()
-            self._render_action()
+
+            if self.render_mode == "human":
+                self._render_action()
 
             if self.render_debug:
                 self._render_debug()
