@@ -60,7 +60,7 @@ class AsteroidsEnv(gym.Env):
 
         if self.render_mode == "human" or self.render_mode == "agent":
             self.surface = pygame.display.set_mode(size=[self.width, self.height])
-            self.resource_manager = ResourceManager(resource_dir + '/Resources/Textures/', True)
+            self.resource_manager = ResourceManager(resource_dir + '/Resources/Images/', True)
 
             # setup display for human rendering
             pygame.display.set_caption("Asteroids")
@@ -339,7 +339,7 @@ class AsteroidsEnv(gym.Env):
         self._render_frame()
 
         if self.render_mode == "rgb_array":
-            return np.array(pygame.surfarray.pixels3d(self.surface))
+            return pygame.surfarray.pixels3d(self.surface)
 
     """
     Renders the frame to self.surface
