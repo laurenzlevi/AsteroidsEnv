@@ -2,14 +2,6 @@ from pygame import image, transform
 
 
 def rotate_image(sprite, angle, position, with_alpha):
-    """
-    Rotate image and calculate its new bounding box
-    :param sprite: image to be rotated
-    :param angle: angle to rotate by in degree
-    :param position: position of the image
-    :param with_alpha: if true image will have transparency
-    :return: the rotated image and its bounding box
-    """
     rotated_image = transform.rotate(sprite, angle)
     rect = rotated_image.get_rect(center=sprite.get_rect(topleft=position).center)
 
@@ -20,18 +12,17 @@ def rotate_image(sprite, angle, position, with_alpha):
 
 
 class ResourceManager:
-    def __init__(self, path):
+    def __init__(self, path, convert):
         self.path = path
+        self.convert = convert
 
     def load_sprite(self, file, with_alpha=True):
-        """
-        Load image form a file in the specified resource directory
-        :param file: filename
-        :param with_alpha: if true image will have transparency
-        :return: the loaded image
-        """
+        img = image.load(f"{self.path}{file}")
+
+        if not self.convert:
+            return img
+
         if with_alpha:
             return image.load(f"{self.path}{file}").convert_alpha()
-
         else:
             return image.load(f"{self.path}{file}").convert()
