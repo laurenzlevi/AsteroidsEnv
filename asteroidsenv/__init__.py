@@ -20,3 +20,13 @@ register(
           "obs_type": "pixels"
      }
 )
+
+register(
+     id="Asteroids-normalized-v0",
+     entry_point="asteroidsenv.env:AsteroidsEnv",
+     max_episode_steps=1800,
+     kwargs={
+          "obs_type": "pixels",
+          "normalize_images": True
+     }
+)

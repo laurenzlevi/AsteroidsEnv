@@ -1,3 +1,4 @@
+import copy
 import logging
 
 import pygame
@@ -31,7 +32,7 @@ class AsteroidsEnv(gym.Env):
         "render_fps": 60.0
     }
 
-    def __init__(self, render_mode=None, obs_type=None, num_rays=None):
+    def __init__(self, render_mode=None, obs_type=None, num_rays=None, normalize_images=False):
         if render_mode is not None and render_mode in self.metadata["render_modes"]:
             if render_mode == "debug":
                 self.render_mode = "human"
@@ -83,6 +84,7 @@ class AsteroidsEnv(gym.Env):
         self.spawn_counter = 0
         self.spawn_delay = 60
         self.ray_hits = []
+        self.normalize_images = normalize_images
 
         for i in range(self.num_rays):
             self.ray_hits.append(RayHit(Vec2(0.0, 0.0), None, MAX_RAY_LENGTH))
@@ -98,7 +100,10 @@ class AsteroidsEnv(gym.Env):
             self.obs_type = obs_type
 
         if self.obs_type == "pixels":
-            self.observation_space = gym.spaces.Box(0.0, 1.0, shape=(84, 84, 3), dtype=np.float32)
+            if self.normalize_images:
+                self.observation_space = gym.spaces.Box(0.0, 1.0, shape=(84, 84, 3), dtype=np.float32)
+            else:
+                self.observation_space = gym.spaces.Box(0.0, 255.0, shape=(84, 84, 3), dtype=np.uint8)
         elif self.obs_type == "features":
             low = [
                 0.0,  # x agent position
@@ -293,8 +298,12 @@ class AsteroidsEnv(gym.Env):
 
     def _get_obs(self):
         if self.obs_type == "pixels":
-            transformed = pygame.transform.smoothscale(self.surface, [84, 84])
-            return (pygame.surfarray.pixels3d(transformed)/255.0).astype(dtype=np.float32)
+            transformed = pygame.transform.scale(self.surface, [84, 84])
+
+            if self.normalize_images:
+                return (pygame.surfarray.pixels3d(transformed)/255.0).astype(dtype=np.float32)
+            else:
+                return pygame.surfarray.pixels3d(transformed).astype(dtype=np.uint8)
 
         elif self.obs_type == "features":
             features = [
@@ -339,7 +348,8 @@ class AsteroidsEnv(gym.Env):
         self._render_frame()
 
         if self.render_mode == "rgb_array":
-            return pygame.surfarray.pixels3d(self.surface)
+            array = copy.deepcopy(pygame.surfarray.pixels3d(self.surface))
+            return array
 
     """
     Renders the frame to self.surface
