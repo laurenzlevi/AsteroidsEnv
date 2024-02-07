@@ -73,7 +73,7 @@ class Spaceship:
         self.shots = []
         self.can_shoot = True
         self.shot_timer = 0
-        self.shot_delay = 10
+        self.shot_delay = 20
         self.num_rays = num_rays
         self._calculate_rays()
         self._calculate_hitbox()
