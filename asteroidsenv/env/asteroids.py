@@ -101,9 +101,9 @@ class AsteroidsEnv(gym.Env):
 
         if self.obs_type == "pixels":
             if self.normalize_images:
-                self.observation_space = gym.spaces.Box(0.0, 1.0, shape=(84, 84, 3), dtype=np.float32)
+                self.observation_space = gym.spaces.Box(0.0, 1.0, shape=(64, 64, 3), dtype=np.float32)
             else:
-                self.observation_space = gym.spaces.Box(0.0, 255.0, shape=(84, 84, 3), dtype=np.uint8)
+                self.observation_space = gym.spaces.Box(0.0, 255.0, shape=(64, 64, 3), dtype=np.uint8)
         elif self.obs_type == "features":
             low = [
                 0.0,  # x agent position
@@ -298,7 +298,7 @@ class AsteroidsEnv(gym.Env):
 
     def _get_obs(self):
         if self.obs_type == "pixels":
-            transformed = pygame.transform.scale(self.surface, [84, 84])
+            transformed = pygame.transform.scale(self.surface, [64, 64])
 
             if self.normalize_images:
                 return (pygame.surfarray.pixels3d(transformed)/255.0).astype(dtype=np.float32)

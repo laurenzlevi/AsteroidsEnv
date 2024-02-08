@@ -192,7 +192,7 @@ class Spaceship:
         position = self.hitbox.b
 
         # shots will be flying in the direction the spaceship is facing
-        self.shots.append(Shot(position, self.direction, 10.0, 3.0, self.bounds))
+        self.shots.append(Shot(position, self.direction, 10.0, 4.0, self.bounds))
 
         self.can_shoot = False
         self.shot_timer = self.shot_delay
